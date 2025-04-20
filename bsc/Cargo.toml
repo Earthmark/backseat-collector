@@ -1,0 +1,11 @@
+[package]
+name = "backseat-collector"
+version = "0.1.0"
+edition = "2024"
+
+[dependencies]
+anyhow = "1.0.98"
+bevy = "0.15.3"
+wasmtime = "31.0.0"
+bsc-brain = { path = "../bsc-brain" }
+wasmtime-wasi = "31.0.0"

@@ -1,0 +1,13 @@
+[workspace]
+resolver = "2"
+members = ["bsc", "bsc-brain"]
+
+[profile.dev]
+opt-level = 1
+
+[profile.dev.package."*"]
+opt-level = 3
+
+[profile.release]
+codegen-units = 1
+lto = "thin"

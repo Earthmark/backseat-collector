@@ -1,0 +1,10 @@
+[package]
+name = "bsc-brain"
+version = "0.1.0"
+edition = "2024"
+
+[dependencies]
+
+[[example]]
+name = "ping"
+crate-type = ["cdylib"]
