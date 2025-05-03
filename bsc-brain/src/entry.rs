@@ -1,3 +1,19 @@
+use crate::model::BrainApi;
+
+pub trait Main {
+    fn update(&mut self, api: &mut impl BrainApi);
+}
+
+pub trait FromApi {
+    fn init(api: &mut impl BrainApi) -> Self;
+}
+
+impl<T: Default> FromApi for T {
+    fn init(_api: &mut impl BrainApi) -> Self {
+        T::default()
+    }
+}
+
 #[macro_export]
 macro_rules! main {
     ($main_type:ident) => {

@@ -1,11 +1,10 @@
-use crate::{BrainApi, Drone, DroneStatus};
+use crate::{internal::{DroneID, StatusCode}, ApiError, BrainApi, Drone, DroneStatus};
 
 #[link(wasm_import_module = "bsc_brain")]
 unsafe extern "C" {
-    fn drone_count() -> i32;
-    fn drone_id(index: i32) -> i32;
-    fn drone_ping(drone: i32) -> i32;
-    fn drone_status(drone: i32, status: &mut DroneStatus) -> i32;
+    fn drone_count() -> u32;
+    fn drone_id(index: u32, id: &mut NativeDrone) -> StatusCode;
+    fn drone_status(drone: NativeDrone, status: &mut DroneStatus) -> StatusCode;
 }
 
 #[derive(Default)]
@@ -20,26 +19,26 @@ impl NativeApi {
 impl BrainApi for NativeApi {
     fn drones(&self) -> impl Iterator<Item = impl Drone> {
         let max = unsafe { drone_count() };
-        (0..max).map(|idx| NativeDrone {
-            id: unsafe { drone_id(idx) },
+        (0..max).filter_map(|idx| {
+            let mut id = NativeDrone::default();
+            unsafe { drone_id(idx, &mut id) }
+                .to_result()
+                .ok()
+                .map(|_| id)
         })
     }
 }
 
+#[derive(Default, Clone)]
+#[repr(transparent)]
 struct NativeDrone {
-    id: i32,
+    id: DroneID,
 }
 
 impl Drone for NativeDrone {
-    fn ping(&self) -> i32 {
-        unsafe { drone_ping(self.id) }
-    }
-
-    fn status(&self) -> DroneStatus {
+    fn status(&self) -> Result<DroneStatus, ApiError> {
         let mut status = DroneStatus::default();
-        unsafe { drone_status(self.id, &mut status) };
-        status
+        unsafe { drone_status(self.clone(), &mut status) }.to_result()?;
+        Ok(status)
     }
 }
-
-
